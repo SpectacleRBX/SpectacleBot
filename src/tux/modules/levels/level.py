@@ -82,8 +82,8 @@ class Level(BaseCog):
 
         logger.debug(f"Level check for {member.name} ({member.id}) in {ctx.guild.name}")
 
-        xp: float = await self.db.levels.get_xp(member.id, ctx.guild.id)
-        level: int = await self.db.levels.get_level(member.id, ctx.guild.id)
+        xp: float = await self.db.levels.get_xp(member.id, 0)
+        level: int = await self.db.levels.get_level(member.id, 0)
 
         logger.debug(f"Retrieved stats for {member.id}: Level {level}, XP {xp}")
 

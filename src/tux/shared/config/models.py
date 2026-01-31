@@ -228,59 +228,85 @@ class XP(BaseModel):
     """XP system configuration."""
 
     XP_BLACKLIST_CHANNELS: Annotated[
-        list[int],
+        dict[int, list[int]],
         Field(
-            default_factory=list,
-            description="XP blacklist channels",
-            examples=[[123456789012345678]],
+            default_factory=dict,
+            description="XP blacklist channels per server",
+            examples=[{
+                123456789012345678: [987654321098765432, 876543210987654321]
+            }],
         ),
     ]
     XP_ROLES: Annotated[
-        list[dict[str, int]],
+        dict[int, list[dict[str, int]]],
         Field(
-            default_factory=list,
-            description="XP roles",
-            examples=[[{"level": 5, "role_id": 123456789012345678}]],
+            default_factory=dict,
+            description="Per server XP roles",
+            examples=[{
+                123456789012345678: [
+                    {"level": 5, "role_id": 987654321098765432},
+                    {"level": 10, "role_id": 876543210987654321}
+                ]
+            }],
         ),
     ]
     XP_MULTIPLIERS: Annotated[
-        list[dict[str, int | float]],
+        dict[int, list[dict[str, int | float]]],
         Field(
-            default_factory=list,
-            description="XP multipliers",
-            examples=[[{"role_id": 123456789012345678, "multiplier": 1.5}]],
+            default_factory=dict,
+            description="XP multipliers per server",
+            examples=[{
+                123456789012345678: [
+                    {"role_id": 987654321098765432, "multiplier": 1.5},
+                    {"role_id": 876543210987654321, "multiplier": 2.0}
+                ]
+            }],
         ),
     ]
     XP_COOLDOWN: Annotated[
-        int,
+        dict[int, int],
         Field(
-            default=1,
-            description="XP cooldown in seconds",
-            examples=[1, 5, 10],
+            default_factory=lambda: {0: 1},
+            description="XP cooldown in seconds per server (0 for default)",
+            examples=[{
+                0: 1,  # Default cooldown
+                123456789012345678: 5,  # Server-specific cooldown
+                987654321098765432: 10
+            }],
         ),
     ]
     LEVELS_EXPONENT: Annotated[
-        float,
+        dict[int, float],
         Field(
-            default=2.0,
-            description="Levels exponent",
-            examples=[2, 3, 1.5],
+            default_factory=lambda: {0: 2.0},
+            description="Levels exponent per server (0 for default)",
+            examples=[{
+                0: 2.0,  # Default exponent
+                123456789012345678: 1.5,  # Server-specific exponent
+                987654321098765432: 3.0
+            }],
         ),
     ]
     SHOW_XP_PROGRESS: Annotated[
-        bool,
+        dict[int, bool],
         Field(
-            default=True,
-            description="Show XP progress",
-            examples=[True, False],
+            default_factory=lambda: {0: True},
+            description="Show XP progress per server (0 for default)",
+            examples=[{
+                0: True,  # Default setting
+                123456789012345678: False  # Server-specific setting
+            }],
         ),
     ]
     ENABLE_XP_CAP: Annotated[
-        bool,
+        dict[int, bool],
         Field(
-            default=False,
-            description="Enable XP cap",
-            examples=[False, True],
+            default_factory=lambda: {0: False},
+            description="Enable XP cap per server (0 for default)",
+            examples=[{
+                0: False,  # Default setting
+                123456789012345678: True  # Server-specific setting
+            }],
         ),
     ]
 

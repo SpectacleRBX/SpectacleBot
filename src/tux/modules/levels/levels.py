@@ -89,8 +89,8 @@ class Levels(BaseCog):
         if ctx.interaction:
             await ctx.defer(ephemeral=True)
 
-        old_level: int = await self.db.levels.get_level(member.id, ctx.guild.id)
-        old_xp: float = await self.db.levels.get_xp(member.id, ctx.guild.id)
+        old_level: int = await self.db.levels.get_level(member.id, 0)
+        old_xp: float = await self.db.levels.get_xp(member.id, 0)
 
         if embed_result := self.levels_service.valid_xplevel_input(new_level):
             logger.warning(
@@ -105,7 +105,7 @@ class Levels(BaseCog):
         new_xp: float = self.levels_service.calculate_xp_for_level(new_level)
         await self.db.levels.update_xp_and_level(
             member.id,
-            ctx.guild.id,
+            0,
             new_xp,
             new_level,
             datetime.datetime.now(datetime.UTC),
@@ -166,13 +166,13 @@ class Levels(BaseCog):
                 await ctx.send(embed=embed_result)
             return
 
-        old_level: int = await self.db.levels.get_level(member.id, ctx.guild.id)
-        old_xp: float = await self.db.levels.get_xp(member.id, ctx.guild.id)
+        old_level: int = await self.db.levels.get_level(member.id, 0)
+        old_xp: float = await self.db.levels.get_xp(member.id, 0)
 
         new_level: int = self.levels_service.calculate_level(xp_amount)
         await self.db.levels.update_xp_and_level(
             member.id,
-            ctx.guild.id,
+            0,
             float(xp_amount),
             new_level,
             datetime.datetime.now(datetime.UTC),
@@ -218,8 +218,8 @@ class Levels(BaseCog):
         if ctx.interaction:
             await ctx.defer(ephemeral=True)
 
-        old_xp: float = await self.db.levels.get_xp(member.id, ctx.guild.id)
-        await self.db.levels.reset_xp(member.id, ctx.guild.id)
+        old_xp: float = await self.db.levels.get_xp(member.id, 0)
+        await self.db.levels.reset_xp(member.id, 0)
 
         logger.info(
             f"XP reset for {member.name} ({member.id}) by {ctx.author.name}: {round(old_xp)} -> 0",
@@ -262,7 +262,7 @@ class Levels(BaseCog):
         if ctx.interaction:
             await ctx.defer(ephemeral=True)
 
-        state: bool = await self.db.levels.toggle_blacklist(member.id, ctx.guild.id)
+        state: bool = await self.db.levels.toggle_blacklist(member.id, 0)
 
         logger.info(
             f"🚫 XP blacklist toggled for {member.name} ({member.id}) by {ctx.author.name}: {'BLACKLISTED' if state else 'UNBLACKLISTED'}",

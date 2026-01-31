@@ -224,11 +224,11 @@ class EmbedCreator:
         """
         try:
             text: str = (
-                f"{user_name}@discord $"
+                f"{user_name} - {Config.BOT_NAME}"
                 if user_name
-                else f"{CONFIG.BOT_INFO.BOT_NAME.lower()}@discord $"
+                else f"{Config.BOT_NAME}"
             )  # TODO: Make this configurable with the new config system.
-            text += f" {round(bot.latency * 1000)}ms" if bot else ""
+            text += f" - {round(bot.latency * 1000)}ms" if bot else ""
 
         except Exception as e:
             logger.debug("Error in get_footer", exc_info=e)
@@ -238,5 +238,5 @@ class EmbedCreator:
             return (
                 text,
                 user_display_avatar
-                or "https://github.com/allthingslinux/tux/blob/main/assets/branding/avatar.avif?raw=true",
+                or "https://cdn.discordapp.com/avatars/1074390992628760638/2039d0cce863185ca2715d34eee6df7c.webp?size=128",
             )

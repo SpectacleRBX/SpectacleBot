@@ -82,18 +82,27 @@ class Level(BaseCog):
 
         logger.debug(f"Level check for {member.name} ({member.id}) in {ctx.guild.name}")
 
-        xp: float = await self.db.levels.get_xp(member.id, 0)
-        level: int = await self.db.levels.get_level(member.id, 0)
+        guild_id = ctx.guild.id
+        xp: float = await self.db.levels.get_xp(member.id, guild_id)
+        level: int = await self.db.levels.get_level(member.id, guild_id)
 
         logger.debug(f"Retrieved stats for {member.id}: Level {level}, XP {xp}")
 
+        # Get server-specific settings from LevelsService
+        enable_xp_cap = self.levels_service.enable_xp_cap.get(
+            guild_id,
+            self.levels_service.enable_xp_cap.get(0, False),
+        )
+        max_level = self.levels_service.get_max_level(guild_id)
+
         level_display: int
         xp_display: str
-        if self.levels_service.enable_xp_cap and level >= self.levels_service.max_level:
+        if enable_xp_cap and level >= max_level:
             max_xp: float = self.levels_service.calculate_xp_for_level(
-                self.levels_service.max_level,
+                max_level,
+                guild_id,
             )
-            level_display = self.levels_service.max_level
+            level_display = max_level
             xp_display = f"{round(max_xp)} (limit reached)"
             logger.debug(f"XP cap reached for {member.id}")
         else:
@@ -103,7 +112,11 @@ class Level(BaseCog):
         if CONFIG.XP_CONFIG.SHOW_XP_PROGRESS:
             xp_progress: int
             xp_required: int
-            xp_progress, xp_required = self.levels_service.get_level_progress(xp, level)
+            xp_progress, xp_required = self.levels_service.get_level_progress(
+                xp,
+                level,
+                guild_id,
+            )
             progress_bar: str = self.levels_service.generate_progress_bar(
                 xp_progress,
                 xp_required,

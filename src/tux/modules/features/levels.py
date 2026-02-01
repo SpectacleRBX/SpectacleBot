@@ -42,25 +42,27 @@ class LevelsService(BaseCog):
 
         self.xp_cooldown = CONFIG.XP_CONFIG.XP_COOLDOWN
         self.levels_exponent = CONFIG.XP_CONFIG.LEVELS_EXPONENT
-        
+
         # The xp_roles and max_level are now handled per server
         self.enable_xp_cap = CONFIG.XP_CONFIG.ENABLE_XP_CAP
-        
+
     def get_max_level(self, guild_id: int) -> int:
         """
         Get the maximum configured level for a guild.
-        
+
         Parameters
         ----------
         guild_id : int
             The guild ID
-            
+
         Returns
         -------
         int
             The maximum level configured for the guild, or 0 if no levels are configured
         """
-        if guild_id in CONFIG.XP_CONFIG.XP_ROLES and (guild_roles := CONFIG.XP_CONFIG.XP_ROLES[guild_id]):
+        if guild_id in CONFIG.XP_CONFIG.XP_ROLES and (
+            guild_roles := CONFIG.XP_CONFIG.XP_ROLES[guild_id]
+        ):
             return max(item["level"] for item in guild_roles)
         return 0
 
@@ -75,15 +77,15 @@ class LevelsService(BaseCog):
             The message object.
         """
         try:
-            # Skip XP processing during maintenance mode
-            if getattr(self.bot, "maintenance_mode", False):
+            # Skip XP processing for bots, DMs, maintenance mode, or blacklisted channels
+            is_maintenance = getattr(self.bot, "maintenance_mode", False)
+            if message.author.bot or not message.guild or is_maintenance:
                 return
 
-            if message.author.bot or not message.guild:
-                return
-                
-            # Check if this channel is in the blacklist for this guild
-            guild_blacklist = CONFIG.XP_CONFIG.XP_BLACKLIST_CHANNELS.get(message.guild.id, [])
+            guild_blacklist = CONFIG.XP_CONFIG.XP_BLACKLIST_CHANNELS.get(
+                message.guild.id,
+                [],
+            )
             if message.channel.id in guild_blacklist:
                 return
 
@@ -111,7 +113,10 @@ class LevelsService(BaseCog):
             last_message_time = (
                 user_level_data.last_message if user_level_data else None
             )
-            if last_message_time and self.is_on_cooldown(last_message_time, message.guild.id):
+            if last_message_time and self.is_on_cooldown(
+                last_message_time,
+                message.guild.id,
+            ):
                 return
 
             # Process XP gain with the already fetched data
@@ -141,8 +146,11 @@ class LevelsService(BaseCog):
         current_level = user_level_data.level if user_level_data else 0
 
         # Get the server-specific exponent or use default (0 is default key)
-        server_exponent = self.levels_exponent.get(guild.id, self.levels_exponent.get(0, 2.0))
-        
+        server_exponent = self.levels_exponent.get(
+            guild.id,
+            self.levels_exponent.get(0, 2.0),
+        )
+
         # Recalculate what level the current XP should be (in case exponent changed)
         # This ensures level is always correct based on current XP and exponent
         expected_level_from_xp = self.calculate_level(current_xp, guild.id)
@@ -159,10 +167,13 @@ class LevelsService(BaseCog):
         xp_increment = self.calculate_xp_increment(member, guild.id)
         new_xp = current_xp + xp_increment
         new_level = self.calculate_level(new_xp, guild.id)
-        
+
         # Log if there's a suspicious level jump (more than 5 levels from expected)
         if new_level > expected_level_from_xp + 5:
-            server_exponent = self.levels_exponent.get(guild.id, self.levels_exponent.get(0, 2.0))
+            server_exponent = self.levels_exponent.get(
+                guild.id,
+                self.levels_exponent.get(0, 2.0),
+            )
             logger.warning(
                 f"Suspicious level jump detected for {member.name} ({member.id}): "
                 f"Level {expected_level_from_xp} -> {new_level} (XP: {current_xp:.2f} -> {new_xp:.2f}, "
@@ -190,7 +201,11 @@ class LevelsService(BaseCog):
             )
             await self.handle_level_up(member, guild, new_level)
 
-    def is_on_cooldown(self, last_message_time: datetime.datetime, guild_id: int = 0) -> bool:
+    def is_on_cooldown(
+        self,
+        last_message_time: datetime.datetime,
+        guild_id: int = 0,
+    ) -> bool:
         """
         Check if the member is on cooldown.
 
@@ -284,19 +299,26 @@ class LevelsService(BaseCog):
 
             role_ids = {role["role_id"] for role in guild_roles}
             roles_to_remove = [
-                r for r in guild_member.roles
-                if r.id in role_ids and r != highest_role
+                r for r in guild_member.roles if r.id in role_ids and r != highest_role
             ]
 
             if roles_to_remove:
                 await guild_member.remove_roles(*roles_to_remove)
 
             if highest_role or roles_to_remove:
-                assigned_text = f"Assigned {highest_role.name}" if highest_role else "No role assigned"
-                removed_text = f", Removed: {', '.join(r.name for r in roles_to_remove)}" if roles_to_remove else ""
+                assigned_text = (
+                    f"Assigned {highest_role.name}"
+                    if highest_role
+                    else "No role assigned"
+                )
+                removed_text = (
+                    f", Removed: {', '.join(r.name for r in roles_to_remove)}"
+                    if roles_to_remove
+                    else ""
+                )
                 logger.debug(
                     f"Updated roles for {guild_member} in {g}: "
-                    f"{assigned_text}{removed_text}"
+                    f"{assigned_text}{removed_text}",
                 )
 
     @staticmethod
@@ -336,7 +358,11 @@ class LevelsService(BaseCog):
         exponent = self.levels_exponent.get(guild_id, self.levels_exponent.get(0, 2.0))
         return 500 * (level / 5) ** exponent
 
-    def calculate_xp_increment(self, member: discord.Member, guild_id: int = 0) -> float:
+    def calculate_xp_increment(
+        self,
+        member: discord.Member,
+        guild_id: int = 0,
+    ) -> float:
         """
         Calculate the XP increment for a member.
 
@@ -359,7 +385,7 @@ class LevelsService(BaseCog):
                 role["role_id"]: role["multiplier"]
                 for role in CONFIG.XP_CONFIG.XP_MULTIPLIERS[guild_id]
             }
-        
+
         return max(
             (guild_multipliers.get(role.id, 1) for role in member.roles),
             default=1,
@@ -383,15 +409,17 @@ class LevelsService(BaseCog):
         """
         # Ensure XP is non-negative to prevent complex number errors
         xp = max(0.0, xp)
-        
+
         # Get server-specific exponent or use default
         exponent = self.levels_exponent.get(guild_id, self.levels_exponent.get(0, 2.0))
-        
+
         # Guard against division by zero
         if exponent == 0:
-            logger.error(f"levels_exponent for guild {guild_id} cannot be 0, using default value of 2")
+            logger.error(
+                f"levels_exponent for guild {guild_id} cannot be 0, using default value of 2",
+            )
             exponent = 2.0
-            
+
         return int((xp / 500) ** (1 / exponent) * 5)
 
     # *NOTE* Do not move this function to utils.py, as this results in a circular import.
@@ -458,7 +486,12 @@ class LevelsService(BaseCog):
 
         return f"`{bar}` {current_value}/{target_value}"
 
-    def get_level_progress(self, xp: float, level: int, guild_id: int = 0) -> tuple[int, int]:
+    def get_level_progress(
+        self,
+        xp: float,
+        level: int,
+        guild_id: int = 0,
+    ) -> tuple[int, int]:
         """
         Get the progress towards the next level.
 

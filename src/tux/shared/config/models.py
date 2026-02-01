@@ -232,9 +232,7 @@ class XP(BaseModel):
         Field(
             default_factory=dict,
             description="XP blacklist channels per server",
-            examples=[{
-                123456789012345678: [987654321098765432, 876543210987654321]
-            }],
+            examples=[{123456789012345678: [987654321098765432, 876543210987654321]}],
         ),
     ]
     XP_ROLES: Annotated[
@@ -242,12 +240,14 @@ class XP(BaseModel):
         Field(
             default_factory=dict,
             description="Per server XP roles",
-            examples=[{
-                123456789012345678: [
-                    {"level": 5, "role_id": 987654321098765432},
-                    {"level": 10, "role_id": 876543210987654321}
-                ]
-            }],
+            examples=[
+                {
+                    123456789012345678: [
+                        {"level": 5, "role_id": 987654321098765432},
+                        {"level": 10, "role_id": 876543210987654321},
+                    ],
+                },
+            ],
         ),
     ]
     XP_MULTIPLIERS: Annotated[
@@ -255,12 +255,14 @@ class XP(BaseModel):
         Field(
             default_factory=dict,
             description="XP multipliers per server",
-            examples=[{
-                123456789012345678: [
-                    {"role_id": 987654321098765432, "multiplier": 1.5},
-                    {"role_id": 876543210987654321, "multiplier": 2.0}
-                ]
-            }],
+            examples=[
+                {
+                    123456789012345678: [
+                        {"role_id": 987654321098765432, "multiplier": 1.5},
+                        {"role_id": 876543210987654321, "multiplier": 2.0},
+                    ],
+                },
+            ],
         ),
     ]
     XP_COOLDOWN: Annotated[
@@ -268,11 +270,13 @@ class XP(BaseModel):
         Field(
             default_factory=lambda: {0: 1},
             description="XP cooldown in seconds per server (0 for default)",
-            examples=[{
-                0: 1,  # Default cooldown
-                123456789012345678: 5,  # Server-specific cooldown
-                987654321098765432: 10
-            }],
+            examples=[
+                {
+                    0: 1,  # Default cooldown
+                    123456789012345678: 5,  # Server-specific cooldown
+                    987654321098765432: 10,
+                },
+            ],
         ),
     ]
     LEVELS_EXPONENT: Annotated[
@@ -280,11 +284,13 @@ class XP(BaseModel):
         Field(
             default_factory=lambda: {0: 2.0},
             description="Levels exponent per server (0 for default)",
-            examples=[{
-                0: 2.0,  # Default exponent
-                123456789012345678: 1.5,  # Server-specific exponent
-                987654321098765432: 3.0
-            }],
+            examples=[
+                {
+                    0: 2.0,  # Default exponent
+                    123456789012345678: 1.5,  # Server-specific exponent
+                    987654321098765432: 3.0,
+                },
+            ],
         ),
     ]
     SHOW_XP_PROGRESS: Annotated[
@@ -292,10 +298,12 @@ class XP(BaseModel):
         Field(
             default_factory=lambda: {0: True},
             description="Show XP progress per server (0 for default)",
-            examples=[{
-                0: True,  # Default setting
-                123456789012345678: False  # Server-specific setting
-            }],
+            examples=[
+                {
+                    0: True,  # Default setting
+                    123456789012345678: False,  # Server-specific setting
+                },
+            ],
         ),
     ]
     ENABLE_XP_CAP: Annotated[
@@ -303,10 +311,12 @@ class XP(BaseModel):
         Field(
             default_factory=lambda: {0: False},
             description="Enable XP cap per server (0 for default)",
-            examples=[{
-                0: False,  # Default setting
-                123456789012345678: True  # Server-specific setting
-            }],
+            examples=[
+                {
+                    0: False,  # Default setting
+                    123456789012345678: True,  # Server-specific setting
+                },
+            ],
         ),
     ]
 

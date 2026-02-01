@@ -224,9 +224,9 @@ class EmbedCreator:
         """
         try:
             text: str = (
-                f"{user_name} - {Config.BOT_NAME}"
+                f"{user_name} - {CONFIG.BOT_INFO.BOT_NAME}"
                 if user_name
-                else f"{Config.BOT_NAME}"
+                else f"{CONFIG.BOT_INFO.BOT_NAME}"
             )  # TODO: Make this configurable with the new config system.
             text += f" - {round(bot.latency * 1000)}ms" if bot else ""
 

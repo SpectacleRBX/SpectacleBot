@@ -150,8 +150,10 @@ def generate_schema() -> None:
         json.dump(schema, f, indent=2, ensure_ascii=False)
 
 
-def _is_env_key(ek: str) -> bool:
+def _is_env_key(ek: Any) -> bool:
     """Return True if this key belongs in .env (Postgres, Valkey, ExternalServices, BOT_TOKEN, DATABASE_URL, DEBUG, LOG_LEVEL, MAINTENANCE_MODE)."""
+    if not isinstance(ek, str):
+        return False
     e = ek.upper()
     if e in {
         "BOT_TOKEN",
@@ -202,12 +204,12 @@ def _flatten_for_env(prefix: str, obj: Any) -> dict[str, str]:
     out: dict[str, str] = {}
     if isinstance(obj, dict):
         for k, v in obj.items():
-            env_key = (prefix + k).upper()
+            env_key = (prefix + str(k)).upper()
             if isinstance(v, dict):
                 if not v:
                     out[env_key] = "{}"
                 elif any(isinstance(x, (dict, list)) for x in v.values()):
-                    out.update(_flatten_for_env(prefix + k + "__", v))
+                    out.update(_flatten_for_env(prefix + str(k) + "__", v))
                 else:
                     out[env_key] = json.dumps(v)
             elif isinstance(v, list):

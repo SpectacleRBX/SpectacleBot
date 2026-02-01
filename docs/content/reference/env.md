@@ -135,13 +135,13 @@ XP system configuration.
 
 | Name | Type | Default | Description | Example |
 |------|------|---------|-------------|---------|
-| `XP_CONFIG__XP_BLACKLIST_CHANNELS` | `array` | `[]` | XP blacklist channels | `[123456789012345678]` |
-| `XP_CONFIG__XP_ROLES` | `array` | `[]` | XP roles | `[{"level": 5, "role_id": 123456789012345678}]` |
-| `XP_CONFIG__XP_MULTIPLIERS` | `array` | `[]` | XP multipliers | `[{"multiplier": 1.5, "role_id": 123456789012345678}]` |
-| `XP_CONFIG__XP_COOLDOWN` | `integer` | `1` | XP cooldown in seconds | `1`, `5`, `10` |
-| `XP_CONFIG__LEVELS_EXPONENT` | `number` | `2.0` | Levels exponent | `2`, `3`, `1.5` |
-| `XP_CONFIG__SHOW_XP_PROGRESS` | `boolean` | `true` | Show XP progress | `true`, `false` |
-| `XP_CONFIG__ENABLE_XP_CAP` | `boolean` | `false` | Enable XP cap | `false`, `true` |
+| `XP_CONFIG__XP_BLACKLIST_CHANNELS` | `object` | `{}` | XP blacklist channels per server | `{"123456789012345678": [987654321098765432, 876543210987654321]}` |
+| `XP_CONFIG__XP_ROLES` | `object` | `{}` | Per server XP roles | `{"123456789012345678": [{"level": 5, "role_id": 987654321098765432}, {"level": 10, "role_id": 876543210987654321}]}` |
+| `XP_CONFIG__XP_MULTIPLIERS` | `object` | `{}` | XP multipliers per server | `{"123456789012345678": [{"multiplier": 1.5, "role_id": 987654321098765432}, {"multiplier": 2.0, "role_id": 876543210987654321}]}` |
+| `XP_CONFIG__XP_COOLDOWN` | `object` | `{"0": 1}` | XP cooldown in seconds per server (0 for default) | `{"0": 1, "123456789012345678": 5, "987654321098765432": 10}` |
+| `XP_CONFIG__LEVELS_EXPONENT` | `object` | `{"0": 2.0}` | Levels exponent per server (0 for default) | `{"0": 2.0, "123456789012345678": 1.5, "987654321098765432": 3.0}` |
+| `XP_CONFIG__SHOW_XP_PROGRESS` | `object` | `{"0": true}` | Show XP progress per server (0 for default) | `{"0": true, "123456789012345678": false}` |
+| `XP_CONFIG__ENABLE_XP_CAP` | `object` | `{"0": false}` | Enable XP cap per server (0 for default) | `{"0": false, "123456789012345678": true}` |
 
 ### Snippets
 

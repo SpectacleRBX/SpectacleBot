@@ -78,7 +78,7 @@ class ReportModal(discord.ui.Modal):
         embed = EmbedCreator.create_embed(
             bot=self.bot,
             embed_type=EmbedCreator.INFO,
-            user_name="tux",
+            user_name="Anonymous",
             title=(f"Anonymous report for {self.short.value}"),  # type: ignore
             description=self.long.value,  # type: ignore
         )

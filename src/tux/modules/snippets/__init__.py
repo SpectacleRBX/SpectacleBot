@@ -32,6 +32,12 @@ class SnippetsBaseCog(BaseCog):
         """
         super().__init__(bot)
 
+        if self.unload_if_missing_config(
+            condition=not CONFIG.SNIPPETS.ENABLED,
+            config_name="SNIPPETS",
+        ):
+            return
+
     async def is_snippetbanned(self, guild_id: int, user_id: int) -> bool:
         """Check if a user is currently snippet banned in a guild.
 

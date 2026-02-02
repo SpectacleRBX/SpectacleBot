@@ -324,6 +324,14 @@ class XP(BaseModel):
 class Snippets(BaseModel):
     """Snippets configuration."""
 
+    ENABLED: Annotated[
+        bool,
+        Field(
+            default=True,
+            description="Enable or disable the snippets module globally",
+            examples=[True, False],
+        ),
+    ]
     LIMIT_TO_ROLE_IDS: Annotated[
         bool,
         Field(

@@ -92,6 +92,7 @@
     }
   },
   "SNIPPETS": {
+    "ENABLED": true,
     "LIMIT_TO_ROLE_IDS": false,
     "ACCESS_ROLE_IDS": [
       123456789012345678,

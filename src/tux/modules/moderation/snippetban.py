@@ -11,6 +11,7 @@ from tux.core.bot import Tux
 from tux.core.checks import requires_command_permission
 from tux.core.flags import SnippetBanFlags
 from tux.database.models import CaseType
+from tux.shared.config import CONFIG
 
 from . import ModerationCogBase
 
@@ -31,6 +32,12 @@ class SnippetBan(ModerationCogBase):
             The bot instance to attach this cog to.
         """
         super().__init__(bot)
+
+        if self.unload_if_missing_config(
+            condition=not CONFIG.SNIPPETS.ENABLED,
+            config_name="SNIPPETS",
+        ):
+            return
 
     @commands.hybrid_command(
         name="snippetban",

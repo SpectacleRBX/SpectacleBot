@@ -7,6 +7,7 @@ various utility functions for level calculations and progress tracking.
 """
 
 import datetime
+import random
 import time
 
 import discord
@@ -355,8 +356,7 @@ class LevelsService(BaseCog):
             The XP required for the level.
         """
         # Get server-specific exponent or use default
-        exponent = self.levels_exponent.get(guild_id, self.levels_exponent.get(0, 2.0))
-        return 500 * (level / 5) ** exponent
+        return 50.0 * (level**2)
 
     def calculate_xp_increment(
         self,
@@ -386,10 +386,13 @@ class LevelsService(BaseCog):
                 for role in CONFIG.XP_CONFIG.XP_MULTIPLIERS[guild_id]
             }
 
-        return max(
-            (guild_multipliers.get(role.id, 1) for role in member.roles),
-            default=1,
+        base_xp = random.randint(10, 20)
+        multiplier = max(
+            (guild_multipliers.get(role.id, 1.0) for role in member.roles),
+            default=1.0,
         )
+
+        return float(base_xp * multiplier)
 
     def calculate_level(self, xp: float, guild_id: int = 0) -> int:
         """
@@ -407,20 +410,7 @@ class LevelsService(BaseCog):
         int
             The calculated level.
         """
-        # Ensure XP is non-negative to prevent complex number errors
-        xp = max(0.0, xp)
-
-        # Get server-specific exponent or use default
-        exponent = self.levels_exponent.get(guild_id, self.levels_exponent.get(0, 2.0))
-
-        # Guard against division by zero
-        if exponent == 0:
-            logger.error(
-                f"levels_exponent for guild {guild_id} cannot be 0, using default value of 2",
-            )
-            exponent = 2.0
-
-        return int((xp / 500) ** (1 / exponent) * 5)
+        return int((xp / 50.0) ** 0.5)
 
     # *NOTE* Do not move this function to utils.py, as this results in a circular import.
     def valid_xplevel_input(self, user_input: int) -> discord.Embed | None:

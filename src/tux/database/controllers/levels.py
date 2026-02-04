@@ -80,7 +80,7 @@ class LevelsController(BaseController[Levels]):
         """
         levels = await self.get_or_create_levels(member_id, 0)
         new_xp = levels.xp + xp_amount
-        new_level = int(new_xp**0.5)  # Simple level calculation
+        new_level = int((new_xp / 50.0) ** 0.5)  # Global level calculation (50x^2)
 
         return (
             await self.update_by_id(
@@ -102,7 +102,7 @@ class LevelsController(BaseController[Levels]):
             The updated levels record.
         """
         levels = await self.get_or_create_levels(member_id, 0)
-        new_level = int(xp**0.5)
+        new_level = int((xp / 50.0) ** 0.5)
 
         return (
             await self.update_by_id(
@@ -124,7 +124,7 @@ class LevelsController(BaseController[Levels]):
             The updated levels record.
         """
         levels = await self.get_or_create_levels(member_id, 0)
-        xp = level**2  # Reverse level calculation
+        xp = 50.0 * (level**2)  # Reverse level calculation (50x^2)
 
         return (
             await self.update_by_id(

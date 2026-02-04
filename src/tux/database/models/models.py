@@ -1086,7 +1086,6 @@ class Levels(BaseModel, table=True):
 
     __table_args__ = (
         CheckConstraint("member_id > 0", name="check_levels_member_id_valid"),
-        CheckConstraint("guild_id > 0", name="check_levels_guild_id_valid"),
         CheckConstraint("xp >= 0", name="check_xp_positive"),
         CheckConstraint("level >= 0", name="check_level_positive"),
         Index("idx_levels_guild_xp", "guild_id", "xp"),

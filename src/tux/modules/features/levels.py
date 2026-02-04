@@ -102,7 +102,7 @@ class LevelsService(BaseCog):
             # Fetch all user level data in one query to minimize DB calls
             user_level_data = await self.db.levels.get_user_level_data(
                 member.id,
-                message.guild.id,
+                0,
             )
 
             # Check if the user is blacklisted
@@ -189,7 +189,7 @@ class LevelsService(BaseCog):
 
         await self.db.levels.update_xp_and_level(
             member.id,
-            guild.id,
+            0,
             xp=new_xp,
             level=new_level,
             last_message=last_message_naive,
@@ -264,14 +264,14 @@ class LevelsService(BaseCog):
         new_level: int,
     ) -> None:
         """
-        Update the roles of a member based on their new level.
+        Update the roles of a member based on their new level across all guilds.
 
         Parameters
         ----------
         member : discord.Member
             The member whose roles are being updated.
         guild : discord.Guild
-            The guild where the member's roles are being updated.
+            The guild where the member's roles were triggered (usually ignored for global).
         new_level : int
             The new level of the member.
         """

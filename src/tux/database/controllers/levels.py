@@ -62,7 +62,7 @@ class LevelsController(BaseController[Levels]):
             return levels
         return await self.create(
             member_id=member_id,
-            guild_id=guild_id,
+            guild_id=0,
             xp=0.0,
             level=0,
             blacklisted=False,
@@ -78,7 +78,7 @@ class LevelsController(BaseController[Levels]):
         Levels
             The updated levels record.
         """
-        levels = await self.get_or_create_levels(member_id, guild_id)
+        levels = await self.get_or_create_levels(member_id, 0)
         new_xp = levels.xp + xp_amount
         new_level = int(new_xp**0.5)  # Simple level calculation
 
@@ -101,7 +101,7 @@ class LevelsController(BaseController[Levels]):
         Levels
             The updated levels record.
         """
-        levels = await self.get_or_create_levels(member_id, guild_id)
+        levels = await self.get_or_create_levels(member_id, 0)
         new_level = int(xp**0.5)
 
         return (
@@ -123,7 +123,7 @@ class LevelsController(BaseController[Levels]):
         Levels
             The updated levels record.
         """
-        levels = await self.get_or_create_levels(member_id, guild_id)
+        levels = await self.get_or_create_levels(member_id, 0)
         xp = level**2  # Reverse level calculation
 
         return (
@@ -145,7 +145,7 @@ class LevelsController(BaseController[Levels]):
         Levels
             The updated levels record.
         """
-        levels = await self.get_or_create_levels(member_id, guild_id)
+        levels = await self.get_or_create_levels(member_id, 0)
         return await self.update_by_id(levels.member_id, blacklisted=True) or levels
 
     async def unblacklist_member(self, member_id: int, guild_id: int) -> Levels:
@@ -157,9 +157,9 @@ class LevelsController(BaseController[Levels]):
         Levels
             The updated levels record.
         """
-        levels = await self.get_levels_by_member(member_id, guild_id)
+        levels = await self.get_levels_by_member(member_id, 0)
         if levels is None:
-            return await self.get_or_create_levels(member_id, guild_id)
+            return await self.get_or_create_levels(member_id, 0)
         return await self.update_by_id(levels.member_id, blacklisted=False) or levels
 
     async def get_top_members(self, guild_id: int, limit: int = 10) -> list[Levels]:
@@ -188,7 +188,7 @@ class LevelsController(BaseController[Levels]):
         float
             The member's XP value.
         """
-        levels = await self.get_or_create_levels(member_id, guild_id)
+        levels = await self.get_or_create_levels(member_id, 0)
         return levels.xp
 
     async def get_level(self, member_id: int, guild_id: int) -> int:
@@ -200,7 +200,7 @@ class LevelsController(BaseController[Levels]):
         int
             The member's level.
         """
-        levels = await self.get_or_create_levels(member_id, guild_id)
+        levels = await self.get_or_create_levels(member_id, 0)
         return levels.level
 
     async def update_xp_and_level(

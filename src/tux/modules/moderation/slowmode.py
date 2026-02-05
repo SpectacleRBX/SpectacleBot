@@ -204,7 +204,7 @@ class Slowmode(BaseCog):
         ephemeral : bool, optional
             Whether the message should be ephemeral (slash commands only), by default True.
         """
-        if ctx.interaction:
+        if ctx.interaction and not ctx.interaction.response.is_done():
             if ctx.interaction.response.is_done():
                 await ctx.interaction.followup.send(content, ephemeral=ephemeral)
             else:

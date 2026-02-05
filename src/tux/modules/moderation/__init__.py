@@ -136,7 +136,7 @@ class ModerationCogBase(BaseCog):
             """Fetch jail status from database."""
             latest = await self.db.case.get_latest_jail_or_unjail_case(
                 user_id=user_id,
-                guild_id=guild_id,
+                guild_id=0,
             )
             return bool(latest and latest.case_type == DBCaseType.JAIL)
 
@@ -158,7 +158,7 @@ class ModerationCogBase(BaseCog):
             True if user is poll banned, False otherwise
         """
         latest_case = await self.db.case.get_latest_case_by_user(
-            guild_id=guild_id,
+            guild_id=0,
             user_id=user_id,
         )
         return bool(latest_case and latest_case.case_type == DBCaseType.POLLBAN)
@@ -183,7 +183,7 @@ class ModerationCogBase(BaseCog):
         """
         latest_case = await self.db.case.get_latest_snippet_ban_or_unban_case(
             user_id=user_id,
-            guild_id=guild_id,
+            guild_id=0,
         )
         return bool(latest_case and latest_case.case_type == DBCaseType.SNIPPETBAN)
 
@@ -205,7 +205,7 @@ class ModerationCogBase(BaseCog):
         ephemeral : bool, optional
             Whether the message should be ephemeral (slash commands only), by default True.
         """
-        if ctx.interaction:
+        if ctx.interaction and not ctx.interaction.response.is_done():
             await ctx.interaction.followup.send(message, ephemeral=ephemeral)
         else:
             await ctx.reply(message, mention_author=False)

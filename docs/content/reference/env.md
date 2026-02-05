@@ -151,6 +151,7 @@ Snippets configuration.
 
 | Name | Type | Default | Description | Example |
 |------|------|---------|-------------|---------|
+| `SNIPPETS__ENABLED` | `boolean` | `true` | Enable or disable the snippets module globally | `true`, `false` |
 | `SNIPPETS__LIMIT_TO_ROLE_IDS` | `boolean` | `false` | Limit snippets to specific roles | `false`, `true` |
 | `SNIPPETS__ACCESS_ROLE_IDS` | `array` | `[]` | Snippet access role IDs | `[123456789012345678, 987654321098765432]` |
 
@@ -163,6 +164,16 @@ IRC bridge configuration.
 | Name | Type | Default | Description | Example |
 |------|------|---------|-------------|---------|
 | `IRC_CONFIG__BRIDGE_WEBHOOK_IDS` | `array` | `[]` | IRC bridge webhook IDs | `[123456789012345678]` |
+
+### Moderation
+
+Moderation configuration.
+
+**Environment Prefix**: `MODERATION__`
+
+| Name | Type | Default | Description | Example |
+|------|------|---------|-------------|---------|
+| `MODERATION__CROSS_SERVER_GUILD_IDS` | `array` | `[]` | Guild IDs where moderation actions should be synchronized | `[123456789012345678, 987654321098765432]` |
 
 ### ExternalServices
 

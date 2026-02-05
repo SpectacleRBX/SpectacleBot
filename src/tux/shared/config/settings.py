@@ -39,6 +39,7 @@ from .models import (
     BotIntents,
     ExternalServices,
     GifLimiter,
+    Moderation,
     Snippets,
     StatusRoles,
     TempVC,
@@ -299,6 +300,7 @@ class Config(BaseSettings):
     XP_CONFIG: XP = Field(default_factory=XP)  # type: ignore[arg-type]
     SNIPPETS: Snippets = Field(default_factory=Snippets)  # type: ignore[arg-type]
     IRC_CONFIG: IRC = Field(default_factory=IRC)  # type: ignore[arg-type]
+    MODERATION: Moderation = Field(default_factory=Moderation)  # type: ignore[arg-type]
 
     # External services
     EXTERNAL_SERVICES: ExternalServices = Field(default_factory=ExternalServices)  # type: ignore[arg-type]

@@ -13,6 +13,9 @@ from typing import Any, Union, get_args, get_origin
 
 from discord.ext import commands
 
+from tux.shared.config import CONFIG
+from tux.shared.version import get_version
+
 __all__ = [
     "clean_reason",
     "convert_to_seconds",
@@ -23,8 +26,62 @@ __all__ = [
     "parse_time_string",
     "seconds_to_human_readable",
     "strip_formatting",
+    "substitute_placeholders",
     "truncate",
 ]
+
+
+def substitute_placeholders(bot: Any, text: str) -> str:
+    """Substitute placeholders in text.
+
+    Available placeholders:
+    {member_count} -> Total member count
+    {guild_count} -> Total guild count
+    {bot_name} -> Bot name
+    {bot_version} -> Bot version
+    {prefix} -> Bot prefix
+
+    Parameters
+    ----------
+    bot : Any
+        The bot instance (Tux).
+    text : str
+        Text to substitute placeholders in.
+
+    Returns
+    -------
+    str
+        Text with placeholders substituted.
+    """
+    if not text:
+        return text
+
+    try:
+        # Build placeholder map only for placeholders present in text
+        placeholders: dict[str, str] = {}
+
+        if "{member_count}" in text:
+            placeholders["member_count"] = str(
+                sum(guild.member_count or 0 for guild in bot.guilds),
+            )
+        if "{guild_count}" in text:
+            placeholders["guild_count"] = str(len(bot.guilds) if bot.guilds else 0)
+        if "{bot_name}" in text:
+            placeholders["bot_name"] = CONFIG.BOT_INFO.BOT_NAME
+        if "{bot_version}" in text:
+            placeholders["bot_version"] = get_version()
+        if "{prefix}" in text:
+            placeholders["prefix"] = CONFIG.get_prefix()
+
+        # Single-pass substitution using format_map
+        if placeholders:
+            text = text.format_map(placeholders)
+
+    except Exception:
+        # Silently fail for substitution errors
+        pass
+
+    return text
 
 
 def clean_reason(reason: str) -> str:

@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, cast
 
 import pytest
 
-from tux.plugins.atl.fact import _substitute_placeholders
+from tux.shared.functions import substitute_placeholders as _substitute_placeholders
 
 if TYPE_CHECKING:
     from tux.core.bot import Tux

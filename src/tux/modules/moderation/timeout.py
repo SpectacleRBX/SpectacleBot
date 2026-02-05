@@ -45,7 +45,7 @@ class Timeout(ModerationCogBase):
     async def timeout(  # noqa: PLR0912
         self,
         ctx: commands.Context[Tux],
-        member: discord.Member,
+        member: discord.Member | discord.User,
         *,
         flags: TimeoutFlags,
     ) -> None:
@@ -64,12 +64,17 @@ class Timeout(ModerationCogBase):
         assert ctx.guild
 
         # Defer early to acknowledge interaction before async work
-        if ctx.interaction:
+        if ctx.interaction and not ctx.interaction.response.is_done():
             await ctx.defer(ephemeral=True)
+
+        # Validate that the target is a member of the guild
+        if not isinstance(member, discord.Member):
+            await self._respond(ctx, f"User {member} is not a member of this server.")
+            return
 
         # Check if target is a bot
         if member.bot:
-            if ctx.interaction:
+            if ctx.interaction and not ctx.interaction.response.is_done():
                 await ctx.interaction.followup.send(
                     "Bots cannot be timed out.",
                     ephemeral=True,
@@ -80,7 +85,7 @@ class Timeout(ModerationCogBase):
 
         # Check if member is already timed out
         if member.is_timed_out():
-            if ctx.interaction:
+            if ctx.interaction and not ctx.interaction.response.is_done():
                 await ctx.interaction.followup.send(
                     f"{member} is already timed out.",
                     ephemeral=True,
@@ -98,7 +103,7 @@ class Timeout(ModerationCogBase):
 
             if duration > max_duration:
                 msg = "Timeout duration exceeds Discord's maximum of 28 days. Setting timeout to maximum allowed (28 days)."
-                if ctx.interaction:
+                if ctx.interaction and not ctx.interaction.response.is_done():
                     await ctx.interaction.followup.send(msg, ephemeral=True)
                 else:
                     await ctx.send(msg)
@@ -109,7 +114,7 @@ class Timeout(ModerationCogBase):
 
         except ValueError as e:
             msg = f"Invalid duration format: {e}"
-            if ctx.interaction:
+            if ctx.interaction and not ctx.interaction.response.is_done():
                 await ctx.interaction.followup.send(msg, ephemeral=True)
             else:
                 await ctx.send(msg)

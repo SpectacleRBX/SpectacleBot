@@ -153,7 +153,7 @@ class Cases(ModerationCogBase):
         Shortcut: `$cases <user>` automatically runs `$cases search -u <user>`.
         """
         # Defer early to acknowledge interaction before async work
-        if ctx.interaction:
+        if ctx.interaction and not ctx.interaction.response.is_done():
             await ctx.defer(ephemeral=True)
 
         if argument is None:
@@ -220,7 +220,7 @@ class Cases(ModerationCogBase):
             The case number to view (e.g., 123).
         """
         # Defer early to acknowledge interaction before async work
-        if ctx.interaction:
+        if ctx.interaction and not ctx.interaction.response.is_done():
             await ctx.defer(ephemeral=True)
 
         await self._view_single_case(ctx, case_number)
@@ -248,7 +248,7 @@ class Cases(ModerationCogBase):
             Filter criteria (--type, --user, --moderator).
         """
         # Defer early to acknowledge interaction before async work
-        if ctx.interaction:
+        if ctx.interaction and not ctx.interaction.response.is_done():
             await ctx.defer(ephemeral=True)
 
         await self._view_cases_with_flags(ctx, flags)
@@ -281,12 +281,12 @@ class Cases(ModerationCogBase):
         assert ctx.guild
 
         # Defer early to acknowledge interaction before async work
-        if ctx.interaction:
+        if ctx.interaction and not ctx.interaction.response.is_done():
             await ctx.defer(ephemeral=True)
 
-        case = await self.db.case.get_case_by_number(case_number, ctx.guild.id)
+        case = await self.db.case.get_case_by_number(case_number, 0)
         if not case:
-            if ctx.interaction:
+            if ctx.interaction and not ctx.interaction.response.is_done():
                 await ctx.interaction.followup.send("Case not found.", ephemeral=True)
             else:
                 await ctx.send("Case not found.")
@@ -294,7 +294,7 @@ class Cases(ModerationCogBase):
 
         # Validate changes
         if not self._has_valid_changes(case, flags):
-            if ctx.interaction:
+            if ctx.interaction and not ctx.interaction.response.is_done():
                 await ctx.interaction.followup.send(
                     "No valid changes provided.",
                     ephemeral=True,
@@ -341,10 +341,10 @@ class Cases(ModerationCogBase):
     async def _view_all_cases(self, ctx: commands.Context[Tux]) -> None:
         """View all cases in the server."""
         assert ctx.guild
-        cases = await self.db.case.get_all_cases(ctx.guild.id)
+        cases = await self.db.case.get_all_cases(0)
 
         if not cases:
-            if ctx.interaction:
+            if ctx.interaction and not ctx.interaction.response.is_done():
                 await ctx.interaction.followup.send("No cases found.", ephemeral=True)
             else:
                 await ctx.send("No cases found.")
@@ -369,9 +369,9 @@ class Cases(ModerationCogBase):
         """
         assert ctx.guild
 
-        case = await self.db.case.get_case_by_number(case_number, ctx.guild.id)
+        case = await self.db.case.get_case_by_number(case_number, 0)
         if not case:
-            if ctx.interaction:
+            if ctx.interaction and not ctx.interaction.response.is_done():
                 await ctx.interaction.followup.send("Case not found.", ephemeral=True)
             else:
                 await ctx.reply("Case not found.", mention_author=False)
@@ -407,10 +407,10 @@ class Cases(ModerationCogBase):
         if hasattr(flags, "moderator") and flags.moderator:
             options["moderator_id"] = flags.moderator.id
 
-        cases = await self.db.case.get_cases_by_options(ctx.guild.id, options)
+        cases = await self.db.case.get_cases_by_options(0, options)
 
         if not cases:
-            if ctx.interaction:
+            if ctx.interaction and not ctx.interaction.response.is_done():
                 await ctx.interaction.followup.send("No cases found.", ephemeral=True)
             else:
                 await ctx.send("No cases found.")
@@ -422,7 +422,7 @@ class Cases(ModerationCogBase):
             total_cases = len(cases)
         else:
             # No filters, get total count of all cases
-            all_cases = await self.db.case.get_all_cases(ctx.guild.id)
+            all_cases = await self.db.case.get_all_cases(0)
             total_cases = len(all_cases)
 
         await self._handle_case_list_response(ctx, cases, total_cases, options)
@@ -449,14 +449,14 @@ class Cases(ModerationCogBase):
         assert case.case_number is not None
 
         updated_case = await self.db.case.update_case_by_number(
-            ctx.guild.id,
+            0,
             case.case_number,
             case_reason=flags.reason if flags.reason is not None else case.case_reason,
             case_status=flags.status if flags.status is not None else case.case_status,
         )
 
         if not updated_case:
-            if ctx.interaction:
+            if ctx.interaction and not ctx.interaction.response.is_done():
                 await ctx.interaction.followup.send(
                     "Failed to update case.",
                     ephemeral=True,
@@ -675,7 +675,7 @@ class Cases(ModerationCogBase):
                 description="Failed to find case.",
                 color=EMBED_COLORS["ERROR"],
             )
-            if ctx.interaction:
+            if ctx.interaction and not ctx.interaction.response.is_done():
                 await ctx.interaction.followup.send(embed=embed, ephemeral=True)
             else:
                 await ctx.send(embed=embed)
@@ -714,7 +714,7 @@ class Cases(ModerationCogBase):
         if hasattr(user, "avatar") and user.avatar:
             embed.set_thumbnail(url=user.avatar.url)
 
-        if ctx.interaction:
+        if ctx.interaction and not ctx.interaction.response.is_done():
             await ctx.interaction.followup.send(embed=embed, ephemeral=True)
         else:
             await ctx.send(embed=embed)
@@ -746,7 +746,7 @@ class Cases(ModerationCogBase):
                 title="Cases",
                 description="No cases found.",
             )
-            if ctx.interaction:
+            if ctx.interaction and not ctx.interaction.response.is_done():
                 await ctx.interaction.followup.send(embed=embed, ephemeral=True)
             else:
                 await ctx.send(embed=embed)

@@ -69,7 +69,7 @@ class Unjail(ModerationCogBase):
         """
         return await self.db.case.get_latest_jail_case(
             user_id=user_id,
-            guild_id=guild_id,
+            guild_id=0,
         )
 
     async def restore_roles(
@@ -172,7 +172,7 @@ class Unjail(ModerationCogBase):
         assert ctx.guild
 
         # Defer early to acknowledge interaction before async work
-        if ctx.interaction:
+        if ctx.interaction and not ctx.interaction.response.is_done():
             await ctx.defer(ephemeral=True)
 
         # Parallelize independent database queries

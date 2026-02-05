@@ -38,7 +38,7 @@ class Kick(ModerationCogBase):
     async def kick(
         self,
         ctx: commands.Context[Tux],
-        member: discord.Member,
+        member: discord.Member | discord.User,
         *,
         flags: KickFlags,
     ) -> None:
@@ -57,11 +57,13 @@ class Kick(ModerationCogBase):
         assert ctx.guild
 
         # Defer early to acknowledge interaction before async work
-        if ctx.interaction:
+        if ctx.interaction and not ctx.interaction.response.is_done():
             await ctx.defer(ephemeral=True)
 
-        # Permission checks are handled by the @requires_command_permission() decorator
-        # Additional validation will be handled by the ModerationCoordinator service
+        # Validate that the target is a member of the guild
+        if not isinstance(member, discord.Member):
+            await self._respond(ctx, f"User {member} is not a member of this server.")
+            return
 
         # Execute kick with case creation and DM
         await self.moderate_user(
@@ -71,7 +73,14 @@ class Kick(ModerationCogBase):
             reason=flags.reason,
             silent=flags.silent,
             dm_action="kicked",
-            actions=[(lambda: member.kick(reason=flags.reason), type(None))],
+            actions=[
+                (
+                    lambda: ctx.guild.kick(member, reason=flags.reason)
+                    if ctx.guild
+                    else None,
+                    type(None),
+                ),
+            ],
         )
 
 

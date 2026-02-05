@@ -38,7 +38,7 @@ class Warn(ModerationCogBase):
     async def warn(
         self,
         ctx: commands.Context[Tux],
-        member: discord.Member,
+        member: discord.Member | discord.User,
         *,
         flags: WarnFlags,
     ) -> None:
@@ -57,8 +57,13 @@ class Warn(ModerationCogBase):
         assert ctx.guild
 
         # Defer early to acknowledge interaction before async work
-        if ctx.interaction:
+        if ctx.interaction and not ctx.interaction.response.is_done():
             await ctx.defer(ephemeral=True)
+
+        # Validate that the target is a member of the guild
+        if not isinstance(member, discord.Member):
+            await self._respond(ctx, f"User {member} is not a member of this server.")
+            return
 
         # Execute warn with case creation and DM
         await self.moderate_user(

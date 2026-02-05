@@ -17,6 +17,7 @@ from loguru import logger
 from tux.core.bot import Tux
 from tux.database.models import Case
 from tux.database.models import CaseType as DBCaseType
+from tux.shared.config import CONFIG
 from tux.ui.embeds import EmbedCreator, EmbedType
 
 from .case_service import CaseService
@@ -60,6 +61,7 @@ class ModerationCoordinator:
         self._case_service = case_service
         self._communication = communication_service
         self._execution = execution_service
+        self._background_tasks: set[asyncio.Task[Any]] = set()
 
     async def execute_moderation_action(  # noqa: PLR0912, PLR0915
         self,
@@ -191,6 +193,24 @@ class ModerationCoordinator:
                 logger.success(
                     f"Successfully executed Discord actions for {case_type.value}",
                 )
+                # Trigger cross-server actions if configured
+                if case_type in {
+                    DBCaseType.BAN,
+                    DBCaseType.KICK,
+                    DBCaseType.TIMEOUT,
+                    DBCaseType.TEMPBAN,
+                }:
+                    task = asyncio.create_task(
+                        self._execute_cross_server_actions(
+                            ctx,
+                            case_type,
+                            user,
+                            reason,
+                            duration,
+                        ),
+                    )
+                    self._background_tasks.add(task)
+                    task.add_done_callback(self._background_tasks.discard)
             except (discord.NotFound, discord.Forbidden) as e:
                 # User left during execution or bot lacks permissions - handle gracefully
                 error_type = (
@@ -641,7 +661,7 @@ class ModerationCoordinator:
             f"guild={ctx.guild.id if ctx.guild else None}, case_kwargs={case_kwargs!r}",
         )
         case = await self._case_service.create_case(
-            guild_id=ctx.guild.id if ctx.guild else 0,
+            guild_id=0,
             user_id=user.id,
             moderator_id=ctx.author.id,
             case_type=case_type,
@@ -825,3 +845,76 @@ class ModerationCoordinator:
             DBCaseType.UNTIMEOUT: "untimeout",
         }
         return action_mapping.get(case_type, "moderated")
+
+    async def _execute_cross_server_actions(
+        self,
+        ctx: commands.Context[Tux],
+        case_type: DBCaseType,
+        user: discord.Member | discord.User,
+        reason: str,
+        duration: int | None = None,
+    ) -> None:
+        """
+        Execute moderation action in other configured cross-server guilds.
+
+        Parameters
+        ----------
+        ctx : commands.Context[Tux]
+            Command context.
+        case_type : DBCaseType
+            Type of moderation action.
+        user : discord.Member | discord.User
+            Target user.
+        reason : str
+            Reason for the action.
+        duration : int | None, optional
+            Duration in seconds (for timeout/tempban), by default None.
+        """
+        guild_ids = CONFIG.MODERATION.CROSS_SERVER_GUILD_IDS
+        if not guild_ids:
+            return
+
+        origin_guild_id = ctx.guild.id if ctx.guild else None
+        cross_reason = f"[Cross-server] {reason}"
+
+        for guild_id in guild_ids:
+            if guild_id == origin_guild_id:
+                continue
+
+            guild = ctx.bot.get_guild(guild_id)
+            if not guild:
+                logger.debug(f"Cross-server: Bot not in guild {guild_id}, skipping.")
+                continue
+
+            try:
+                if case_type in {DBCaseType.BAN, DBCaseType.TEMPBAN}:
+                    # Ban works even if they are not in the guild
+                    await guild.ban(user, reason=cross_reason)
+                    logger.info(f"Cross-server: Banned {user.id} from guild {guild_id}")
+
+                elif case_type == DBCaseType.KICK:
+                    member = guild.get_member(user.id)
+                    if member:
+                        await member.kick(reason=cross_reason)
+                        logger.info(
+                            f"Cross-server: Kicked {user.id} from guild {guild_id}",
+                        )
+
+                elif case_type == DBCaseType.TIMEOUT:
+                    member = guild.get_member(user.id)
+                    if member and duration:
+                        # Convert duration to timedelta for timeout
+                        delta = timedelta(seconds=duration)
+                        await member.timeout(delta, reason=cross_reason)
+                        logger.info(
+                            f"Cross-server: Timed out {user.id} in guild {guild_id} for {duration}s",
+                        )
+
+            except discord.Forbidden:
+                logger.warning(
+                    f"Cross-server: Missing permissions to {case_type.value} {user.id} in guild {guild_id}",
+                )
+            except Exception as e:
+                logger.error(
+                    f"Cross-server: Unexpected error in guild {guild_id} for {case_type.value}: {e}",
+                )

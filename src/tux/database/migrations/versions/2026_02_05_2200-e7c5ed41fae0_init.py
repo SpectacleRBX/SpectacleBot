@@ -1,7 +1,7 @@
 """
-Revision ID: 12e5d7b32ddf
+Revision ID: e7c5ed41fae0
 Revises:
-Create Date: 2026-01-20 11:43:08.183366+00:00
+Create Date: 2026-02-05 22:00:45.005314+00:00
 """
 
 from __future__ import annotations
@@ -14,7 +14,7 @@ import sqlmodel
 
 
 # revision identifiers, used by Alembic.
-revision: str = "12e5d7b32ddf"
+revision: str = "e7c5ed41fae0"
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -40,7 +40,6 @@ def upgrade() -> None:
         sa.Column("guild_joined_at", sa.DateTime(), nullable=True),
         sa.Column("case_count", sa.Integer(), nullable=False),
         sa.CheckConstraint("case_count >= 0", name="check_case_count_positive"),
-        sa.CheckConstraint("id > 0", name="check_guild_id_valid"),
         sa.PrimaryKeyConstraint("id"),
     )
     with op.batch_alter_table("guild", schema=None) as batch_op:
@@ -149,7 +148,6 @@ def upgrade() -> None:
             "case_number IS NULL OR case_number >= 1", name="check_case_number_positive"
         ),
         sa.CheckConstraint("case_user_id > 0", name="check_case_user_id_valid"),
-        sa.CheckConstraint("guild_id > 0", name="check_case_guild_id_valid"),
         sa.CheckConstraint(
             "mod_log_message_id IS NULL OR mod_log_message_id > 0",
             name="check_mod_msg_id_valid",
@@ -167,13 +165,28 @@ def upgrade() -> None:
             unique=False,
             postgresql_where="case_status = TRUE",
         )
+        batch_op.create_index(
+            "idx_case_expired_tempbans",
+            ["guild_id", "case_type", "case_status", "case_expires_at"],
+            unique=False,
+            postgresql_where="case_type = 'TEMPBAN' AND case_status = TRUE AND case_processed = FALSE AND case_expires_at IS NOT NULL",
+        )
         batch_op.create_index("idx_case_expires_at", ["case_expires_at"], unique=False)
         batch_op.create_index("idx_case_guild", ["guild_id"], unique=False)
         batch_op.create_index(
             "idx_case_guild_moderator", ["guild_id", "case_moderator_id"], unique=False
         )
         batch_op.create_index(
+            "idx_case_guild_number", ["guild_id", "case_number"], unique=False
+        )
+        batch_op.create_index(
             "idx_case_guild_user", ["guild_id", "case_user_id"], unique=False
+        )
+        batch_op.create_index(
+            "idx_case_jail_unjail",
+            ["guild_id", "case_user_id", "case_type", "id"],
+            unique=False,
+            postgresql_where="case_type IN ('JAIL', 'UNJAIL')",
         )
         batch_op.create_index("idx_case_number", ["case_number"], unique=False)
         batch_op.create_index("idx_case_processed", ["case_processed"], unique=False)
@@ -275,7 +288,6 @@ def upgrade() -> None:
         sa.Column("level", sa.Integer(), nullable=False),
         sa.Column("blacklisted", sa.Boolean(), nullable=False),
         sa.Column("last_message", sa.DateTime(), nullable=False),
-        sa.CheckConstraint("guild_id > 0", name="check_levels_guild_id_valid"),
         sa.CheckConstraint("level >= 0", name="check_level_positive"),
         sa.CheckConstraint("member_id > 0", name="check_levels_member_id_valid"),
         sa.CheckConstraint("xp >= 0", name="check_xp_positive"),
@@ -693,10 +705,18 @@ def downgrade() -> None:
         batch_op.drop_index("idx_case_status")
         batch_op.drop_index("idx_case_processed")
         batch_op.drop_index("idx_case_number")
+        batch_op.drop_index(
+            "idx_case_jail_unjail", postgresql_where="case_type IN ('JAIL', 'UNJAIL')"
+        )
         batch_op.drop_index("idx_case_guild_user")
+        batch_op.drop_index("idx_case_guild_number")
         batch_op.drop_index("idx_case_guild_moderator")
         batch_op.drop_index("idx_case_guild")
         batch_op.drop_index("idx_case_expires_at")
+        batch_op.drop_index(
+            "idx_case_expired_tempbans",
+            postgresql_where="case_type = 'TEMPBAN' AND case_status = TRUE AND case_processed = FALSE AND case_expires_at IS NOT NULL",
+        )
         batch_op.drop_index(
             "idx_case_active_guild", postgresql_where="case_status = TRUE"
         )

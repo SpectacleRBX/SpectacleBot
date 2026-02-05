@@ -162,7 +162,6 @@ class Guild(BaseModel, table=True):
 
     __table_args__ = (
         CheckConstraint("case_count >= 0", name="check_case_count_positive"),
-        CheckConstraint("id > 0", name="check_guild_id_valid"),
         Index("idx_guild_id", "id"),
     )
 
@@ -676,7 +675,6 @@ class Case(BaseModel, table=True):
     )
 
     __table_args__ = (
-        CheckConstraint("guild_id > 0", name="check_case_guild_id_valid"),
         CheckConstraint("case_user_id > 0", name="check_case_user_id_valid"),
         CheckConstraint("case_moderator_id > 0", name="check_case_moderator_id_valid"),
         CheckConstraint(

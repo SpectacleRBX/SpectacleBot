@@ -363,6 +363,19 @@ class IRC(BaseModel):
     ]
 
 
+class Moderation(BaseModel):
+    """Moderation configuration."""
+
+    CROSS_SERVER_GUILD_IDS: Annotated[
+        list[int],
+        Field(
+            default_factory=list,
+            description="Guild IDs where moderation actions should be synchronized",
+            examples=[[123456789012345678, 987654321098765432]],
+        ),
+    ]
+
+
 class ExternalServices(BaseModel):
     """External services configuration."""
 

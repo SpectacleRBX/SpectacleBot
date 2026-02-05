@@ -108,7 +108,7 @@ class CaseService:
         list[Case]
             List of cases for the user.
         """
-        return await self._case_controller.get_cases_by_user(user_id, guild_id)
+        return await self._case_controller.get_cases_by_user(user_id, 0)
 
     async def get_active_cases(self, user_id: int, guild_id: int) -> list[Case]:
         """
@@ -126,7 +126,7 @@ class CaseService:
         list[Case]
             List of active cases for the user.
         """
-        return await self._case_controller.get_active_cases_by_user(user_id, guild_id)
+        return await self._case_controller.get_active_cases_by_user(user_id, 0)
 
     async def update_mod_log_message_id(
         self,

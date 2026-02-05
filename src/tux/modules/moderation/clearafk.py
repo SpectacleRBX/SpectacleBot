@@ -62,11 +62,11 @@ class ClearAFK(BaseCog):
         assert ctx.guild
 
         # Defer early to acknowledge interaction before async work
-        if ctx.interaction:
+        if ctx.interaction and not ctx.interaction.response.is_done():
             await ctx.defer(ephemeral=True)
 
         if not await self.db.afk.is_afk(member.id, guild_id=ctx.guild.id):
-            if ctx.interaction:
+            if ctx.interaction and not ctx.interaction.response.is_done():
                 msg = await ctx.interaction.followup.send(
                     f"{member.mention} is not currently AFK.",
                     ephemeral=True,
@@ -80,7 +80,7 @@ class ClearAFK(BaseCog):
 
         if not entry:
             # Entry was removed between check and fetch (race condition)
-            if ctx.interaction:
+            if ctx.interaction and not ctx.interaction.response.is_done():
                 msg = await ctx.interaction.followup.send(
                     f"{member.mention} is no longer AFK.",
                     ephemeral=True,
@@ -120,7 +120,7 @@ class ClearAFK(BaseCog):
             with contextlib.suppress(discord.Forbidden):
                 await member.edit(nick=entry.nickname)
 
-        if ctx.interaction:
+        if ctx.interaction and not ctx.interaction.response.is_done():
             msg = await ctx.interaction.followup.send(
                 f"AFK status for {member.mention} has been cleared.",
                 ephemeral=True,

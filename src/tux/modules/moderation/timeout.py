@@ -42,7 +42,7 @@ class Timeout(ModerationCogBase):
     )
     @commands.guild_only()
     @requires_command_permission()
-    async def timeout(  # noqa: PLR0912
+    async def timeout(
         self,
         ctx: commands.Context[Tux],
         member: discord.Member | discord.User,
@@ -62,15 +62,6 @@ class Timeout(ModerationCogBase):
             The flags for the command (duration: str, silent: bool).
         """
         assert ctx.guild
-
-        # Defer early to acknowledge interaction before async work
-        if ctx.interaction and not ctx.interaction.response.is_done():
-            await ctx.defer(ephemeral=True)
-
-        # Validate that the target is a member of the guild
-        if not isinstance(member, discord.Member):
-            await self._respond(ctx, f"User {member} is not a member of this server.")
-            return
 
         # Check if target is a bot
         if member.bot:

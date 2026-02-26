@@ -56,14 +56,8 @@ class Kick(ModerationCogBase):
         """
         assert ctx.guild
 
-        # Defer early to acknowledge interaction before async work
-        if ctx.interaction and not ctx.interaction.response.is_done():
-            await ctx.defer(ephemeral=True)
-
-        # Validate that the target is a member of the guild
-        if not isinstance(member, discord.Member):
-            await self._respond(ctx, f"User {member} is not a member of this server.")
-            return
+        # Permission checks are handled by the @requires_command_permission() decorator
+        # Additional validation will be handled by the ModerationCoordinator service
 
         # Execute kick with case creation and DM
         await self.moderate_user(

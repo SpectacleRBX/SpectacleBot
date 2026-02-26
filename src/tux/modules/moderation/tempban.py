@@ -54,13 +54,6 @@ class TempBan(ModerationCogBase):
         """
         assert ctx.guild
 
-        # Defer early to acknowledge interaction before async work
-        if ctx.interaction and not ctx.interaction.response.is_done():
-            await ctx.defer(ephemeral=True)
-
-        # Validate that the target can be banned (even if not in guild, but usually better to have User)
-        # For tempban, we don't necessarily need them to be in the guild to ban them, but standard ban is often used for this.
-
         # Execute tempban with case creation and DM
         await self.moderate_user(
             ctx=ctx,
@@ -71,13 +64,15 @@ class TempBan(ModerationCogBase):
             dm_action="temp banned",
             actions=[
                 (
-                    lambda: ctx.guild.ban(
-                        member,
-                        reason=flags.reason,
-                        delete_message_seconds=flags.purge * 86400,
-                    )
-                    if ctx.guild
-                    else None,
+                    lambda: (
+                        ctx.guild.ban(
+                            member,
+                            reason=flags.reason,
+                            delete_message_seconds=flags.purge * 86400,
+                        )
+                        if ctx.guild
+                        else None
+                    ),
                     type(None),
                 ),
             ],

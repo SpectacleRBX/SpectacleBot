@@ -294,7 +294,9 @@ class DatabaseService:
         """
         start_time = time.perf_counter()
         retry_count = 0
-        operation_name = span_desc.split(":")[0] if ":" in span_desc else "query"
+        operation_name = (
+            span_desc.split(":", maxsplit=1)[0] if ":" in span_desc else "query"
+        )
 
         for attempt in range(max_retries):
             try:
@@ -445,7 +447,7 @@ class DatabaseService:
                 "Engine should not be None after connection check"
             )
             async with self._engine.begin() as conn:
-                inspector = await conn.run_sync(lambda sync_conn: inspect(sync_conn))
+                inspector = await conn.run_sync(inspect)
 
                 # Check if required tables exist
                 existing_tables = await conn.run_sync(

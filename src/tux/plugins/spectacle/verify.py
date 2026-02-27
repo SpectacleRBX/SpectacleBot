@@ -239,9 +239,11 @@ class Verify(BaseCog):
                 f"https://spst.dev/verify?success=true&rbx={roblox_username}&dc={name}",
             )
 
-        except Exception as e:
+        except Exception:
             logger.exception("Error during Roblox OAuth2 callback processing")
-            return web.Response(text=f"An internal error occurred: {e}", status=500)
+            return web.HTTPFound(
+                "https://spst.dev/verify?success=false",
+            )
 
     async def _apply_roles(  # noqa: PLR0912
         self,

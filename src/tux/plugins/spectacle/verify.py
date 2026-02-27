@@ -102,7 +102,7 @@ class Verify(BaseCog):
             self._verifiers[state] = params["verifier"]
 
         client_id = CONFIG.OAUTH2_CLIENTID
-        redirect_uri = "http://localhost:5000/callback"
+        redirect_uri = "https://verify.spst.dev/callback"
         scopes = "openid profile group:read"
 
         auth_url = (

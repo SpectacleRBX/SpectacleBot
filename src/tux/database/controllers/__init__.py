@@ -29,6 +29,7 @@ __all__ = [
     "SnippetController",
     "StarboardController",
     "StarboardMessageController",
+    "VerificationController",
 ]
 
 from tux.database.controllers.afk import AfkController
@@ -50,6 +51,7 @@ from tux.database.controllers.starboard import (
     StarboardController,
     StarboardMessageController,
 )
+from tux.database.controllers.verification import VerificationController
 
 
 class DatabaseCoordinator:
@@ -113,6 +115,7 @@ class DatabaseCoordinator:
         self._starboard: StarboardController | None = None
         self._starboard_message: StarboardMessageController | None = None
         self._reminder: ReminderController | None = None
+        self._verification: VerificationController | None = None
 
     @property
     def guild(self) -> GuildController:
@@ -209,3 +212,10 @@ class DatabaseCoordinator:
                 cache_backend=getattr(self, "_cache_backend", None),
             )
         return self._permission_commands
+
+    @property
+    def verification(self) -> VerificationController:
+        """Get the verification controller."""
+        if self._verification is None:
+            self._verification = VerificationController(self.db)
+        return self._verification

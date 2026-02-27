@@ -1272,3 +1272,55 @@ class StarboardMessage(BaseModel, table=True):
     def __repr__(self) -> str:
         """Return string representation showing guild, original message and user."""
         return f"<StarboardMessage id={self.id} guild={self.message_guild_id} user={self.message_user_id} channel={self.message_channel_id}>"
+
+
+# =============================================================================
+# VERIFICATION MODELS
+# =============================================================================
+
+
+class Verification(BaseModel, table=True):
+    """Linkage between Discord and Roblox accounts.
+
+    Stores the verified Roblox account information for each Discord user.
+
+    Attributes
+    ----------
+    discord_id : int
+        Discord user ID (primary key).
+    roblox_id : int
+        Roblox user ID.
+    roblox_username : str, optional
+        Roblox username at the time of verification.
+    verified_at : datetime
+        Timestamp when the user was verified.
+    """
+
+    discord_id: int = Field(
+        primary_key=True,
+        sa_type=BigInteger,
+        description="Discord user ID",
+    )
+    roblox_id: int = Field(
+        sa_type=BigInteger,
+        description="Roblox user ID",
+    )
+    roblox_username: str | None = Field(
+        default=None,
+        max_length=100,
+        description="Roblox username",
+    )
+    verified_at: datetime = Field(
+        default_factory=lambda: datetime.now(UTC).replace(tzinfo=None),
+        description="Timestamp when verification occurred",
+    )
+
+    __table_args__ = (
+        CheckConstraint("discord_id > 0", name="check_verification_discord_id_valid"),
+        CheckConstraint("roblox_id > 0", name="check_verification_roblox_id_valid"),
+        Index("idx_verification_roblox", "roblox_id"),
+    )
+
+    def __repr__(self) -> str:
+        """Return string representation showing Discord and Roblox IDs."""
+        return f"<Verification discord={self.discord_id} roblox={self.roblox_id}>"

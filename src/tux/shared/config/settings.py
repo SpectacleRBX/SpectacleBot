@@ -44,6 +44,7 @@ from .models import (
     StatusRoles,
     TempVC,
     UserIds,
+    Verification,
 )
 
 
@@ -301,6 +302,29 @@ class Config(BaseSettings):
     SNIPPETS: Snippets = Field(default_factory=Snippets)  # type: ignore[arg-type]
     IRC_CONFIG: IRC = Field(default_factory=IRC)  # type: ignore[arg-type]
     MODERATION: Moderation = Field(default_factory=Moderation)  # type: ignore[arg-type]
+    OAUTH2_CLIENTID: Annotated[
+        str,
+        Field(
+            default="",
+            description="Roblox OAuth2 Client ID",
+        ),
+    ]
+    OAUTH2_SECRET: Annotated[
+        str,
+        Field(
+            default="",
+            description="Roblox OAuth2 Client Secret",
+        ),
+    ]
+    WEB_PORT: Annotated[
+        int,
+        Field(
+            default=8080,
+            description="Port for the bot's web server",
+        ),
+    ]
+
+    VERIFICATION: Verification = Field(default_factory=Verification)  # type: ignore[arg-type]
 
     # External services
     EXTERNAL_SERVICES: ExternalServices = Field(default_factory=ExternalServices)  # type: ignore[arg-type]

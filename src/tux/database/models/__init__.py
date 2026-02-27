@@ -24,6 +24,7 @@ from .models import (
     Snippet,
     Starboard,
     StarboardMessage,
+    Verification,
 )
 
 __all__ = [
@@ -51,4 +52,5 @@ __all__ = [
     # Starboard system
     "Starboard",
     "StarboardMessage",
+    "Verification",
 ]

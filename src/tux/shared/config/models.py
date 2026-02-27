@@ -376,6 +376,35 @@ class Moderation(BaseModel):
     ]
 
 
+class VerificationConfig(BaseModel):
+    """Per-guild verification configuration."""
+
+    VERIFIED_ROLE_ID: int = Field(
+        default=0,
+        description="Role ID to give to verified users",
+    )
+    GROUP_MEMBER_ROLE_ID: int = Field(
+        default=0,
+        description="Role ID to give to users in the specified Roblox group",
+    )
+    ROBLOX_GROUP_ID: int = Field(
+        default=16185131,
+        description="Roblox group ID to check for membership",
+    )
+
+
+class Verification(BaseModel):
+    """Verification configuration."""
+
+    GUILDS: Annotated[
+        dict[int, VerificationConfig],
+        Field(
+            default_factory=lambda: {0: VerificationConfig()},
+            description="Per-server verification settings (use guild ID 0 for defaults)",
+        ),
+    ]
+
+
 class ExternalServices(BaseModel):
     """External services configuration."""
 
